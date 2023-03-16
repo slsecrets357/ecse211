@@ -1,9 +1,4 @@
 #!/usr/bin/env python3
-
-"""
-Module to play sounds when the touch sensor is pressed.
-This file must be run on the robot.
-"""
  
 from utils import sound
 from utils.brick import TouchSensor, wait_ready_sensors, Motor
@@ -50,14 +45,9 @@ class Band():
                     self.cw = not self.cw #toggle
     #               print("toggle drum direction. clockwise is now ", self.cw)
                 if self.pauseDrum:
-#                     self.motor.set_limits(power=0)
                     pass
                 else:
                     #play drum
-                    #print("drumming")
-#                     sign = 1 if self.cw else -1
-#                     self.motor.set_power(sign*30)
-                 #   self.motor.set_limits(power=30, dps=90)
                     if self.cw:
                         self.motor.set_position_relative(40)
                     else:
@@ -137,9 +127,6 @@ if __name__=='__main__':
     #wait_ready_sensors() # Note: Touch sensors actually have no initialization time
     initialPos = band.motor.get_position()
     print("initial position: ", initialPos)
-#     print("resetting encoder..")
-#     band.motor.reset_encoder()
-#     print("done resetting encoder")
     band.motor.set_limits(dps=80)
     band.play()
 
