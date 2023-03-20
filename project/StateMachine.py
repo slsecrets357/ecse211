@@ -47,7 +47,7 @@ class StateMachine():
                 pass
             elif self.state == 2: #lane following
                 #read sensors
-                colorIndex, colorName = utility.sort_color(self.cubeColorSensor.get_rgb())
+                colorIndex, colorName = utility.detect_color(self.cubeColorSensor.get_rgb(), track = True)
                 if colorIndex == 2: #green detected
                     print("Green detected")
                     self.change_state(3)
@@ -59,15 +59,15 @@ class StateMachine():
                 continue
             elif self.state == 3: #delivering1: adjusting position
                 #TODO: adjust position
-                #TODO: drop cube
                 if self.done:
                     self.change_state(4) #go to rotating platter
                     self.done = False
                     continue
                 self.leftWheelMotor.set_power(0)
                 self.rightWheelMotor.set_power(0)
-                time.sleep(3)
-                self.change_state(2)
+                # time.sleep(3)
+                # self.change_state(2)
+                self.done = True
                 continue
             elif self.state == 4: #delivering2: rotate platter
                 if self.done:
@@ -79,7 +79,7 @@ class StateMachine():
                 if self.deliverColor is None:
                     self.deliverColor = -1
                     while self.deliverColor == -1: #read until color is detected
-                        self.deliverColor = utility.sort_color(self.cubeColorSensor.get_rgb())[0]
+                        self.deliverColor = utility.detect_color(self.cubeColorSensor.get_rgb(), track = True)[0]
                     #find index of color
                     for i in range(len(self.cubes)):
                         if self.cubes[i] == self.deliverColor:
@@ -89,7 +89,9 @@ class StateMachine():
                         print("Error: color not found. Attempting to try again...")
                         self.deliverColor = None
                         continue
+                    print(f"current cube pointer: {self.cubePointer}, deliver index: {self.deliverIndex}")
                     rotation = 60*(self.deliverIndex-self.cubePointer) #calculate rotation in degrees
+                    print(f"rotating {rotation} degrees...")
                     self.rotationMotor.set_position_relative(rotation) #rotate platter
                     self.rotationMotor.wait_is_stopped() #wait until rotation is done
                     self.cubePointer = self.deliverIndex #update cube pointer
@@ -101,8 +103,13 @@ class StateMachine():
                     self.change_state(newState) #go back to lane following
                     self.done = False
                     continue
+                print("pushing cube...")
                 self.pushingMotor.set_position_relative(60) #push cube
                 self.pushingMotor.wait_is_stopped() #wait until pushing is done
+                print("done pushing cube...")
+                self.pushingMotor.set_position_relative(-60) #pull cube back
+                self.pushingMotor.wait_is_stopped() #wait until pulling is done
+                print("moving out of green zone...")
                 self.leftWheelMotor.set_position_relative(360) #move forward 1 tile to exit green zone
                 self.rightWheelMotor.set_position_relative(360) #move forward 1 tile
                 self.leftWheelMotor.wait_is_stopped() #wait until moving is done
