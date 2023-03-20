@@ -1,22 +1,21 @@
 
 #define colors in rgb space
-#BLUE = [150, 255, 230]
-#RED = [255, 20, 20]
-#GREEN = [30, 255, 30]
-
-BLUE = [0, 0, 255]
-RED = [255, 0, 0]
-GREEN = [0, 255, 0]
-
-#YELLOW = [255, 215, 15]
+#values obtained by taking 20 measurements of each color
+BLUE = [150, 255, 230]
+RED = [255, 20, 20]
+GREEN = [30, 255, 30]
+YELLOW = [255, 215, 15]
 WHITE = [255,255,255]
-#ORANGE = [255, 80, 30]
-#MAGENTA = [255, 200, 200]
-#default_colors = [BLUE, RED, GREEN, YELLOW, ORANGE, MAGENTA, WHITE]
-#color_names = ['blue', 'red', 'green', 'yellow', 'orange', 'magenta', 'white']
+ORANGE = [255, 80, 30]
+MAGENTA = [255, 200, 200]
+default_colors = [BLUE, RED, GREEN, YELLOW, ORANGE, MAGENTA, WHITE]
+color_names = ['blue', 'red', 'green', 'yellow', 'orange', 'magenta', 'white']
 
-default_colors = [BLUE, RED, GREEN]
-color_names = ['blue', 'red', 'green']
+TRACK_WHITE = [207, 182,  97]
+TRACK_GREEN = [71, 185,  33]
+TRACK_BLUE = [147, 188,  190]
+TRACK_RED = [ 193,  29,  13]
+track_default_colors = [TRACK_WHITE, TRACK_GREEN, TRACK_BLUE, TRACK_RED]
 
 def euclidean_distance(color_a, color_b):
     """
@@ -27,7 +26,7 @@ def euclidean_distance(color_a, color_b):
     b_diff = (color_a[2] - color_b[2]) ** 2
     return (r_diff + g_diff + b_diff) ** 0.5
 
-def sort_color(rgbValue):
+def sort_color(rgbValue, track=False):
     if rgbValue[0] is None or rgbValue[1] is None or rgbValue[2] is None:
         print("rgb value is none.")
         return -1, -1
@@ -38,14 +37,15 @@ def sort_color(rgbValue):
     print(rgbValue)
     #classify color based on euclidean distance to default colors
     distances = []
-    for color in default_colors:
+    colors = default_colors if not track else track_default_colors
+    for color in colors:
         dist = euclidean_distance(color, rgbValue)
         distances.append(dist)
     minDistance = min(distances)
     index = distances.index(minDistance)
-#    if minDistance >= 75:
- #       print("not sure. Ignore this value")
- #       return -1, -1
+    if minDistance >= 75:
+       print("not sure. Ignore this value")
+       return -1, -1
     # distances = np.linalg.norm(default_colors - rgbValue, axis=1)
     # index = np.argmin(distances)
     print("Color detected: " + color_names[index] + " error is " + str(minDistance))
@@ -80,10 +80,10 @@ def go_straight():
 
 def turn_right():
     #turn right
-    return 1,0
+    return 1,-0.75
 
 def turn_left():
     #turn left
-    return 0,1
+    return -0.75,1
     
     
