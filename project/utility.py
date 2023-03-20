@@ -1,6 +1,6 @@
 
 #define colors in rgb space
-#values obtained by taking 20 measurements of each color
+#ground values obtained by taking 20 measurements of each color
 BLUE = [150, 255, 230]
 RED = [255, 20, 20]
 GREEN = [30, 255, 30]
@@ -11,11 +11,11 @@ MAGENTA = [255, 200, 200]
 default_colors = [BLUE, RED, GREEN, YELLOW, ORANGE, MAGENTA, WHITE]
 color_names = ['blue', 'red', 'green', 'yellow', 'orange', 'magenta', 'white']
 
-TRACK_WHITE = [207, 182,  97]
-TRACK_GREEN = [71, 185,  33]
-TRACK_BLUE = [147, 188,  190]
-TRACK_RED = [ 193,  29,  13]
-track_default_colors = [TRACK_WHITE, TRACK_GREEN, TRACK_BLUE, TRACK_RED]
+TRACK_BLUE = [198, 252,  255]
+TRACK_RED = [ 255,  38,  17]
+TRACK_GREEN = [98, 255,  45]
+TRACK_WHITE = [255, 224,  119] #[207, 182,  97]
+track_default_colors = [TRACK_BLUE, TRACK_RED, TRACK_GREEN, YELLOW, ORANGE, MAGENTA, TRACK_WHITE]
 
 def euclidean_distance(color_a, color_b):
     """
@@ -26,10 +26,11 @@ def euclidean_distance(color_a, color_b):
     b_diff = (color_a[2] - color_b[2]) ** 2
     return (r_diff + g_diff + b_diff) ** 0.5
 
-def sort_color(rgbValue, track=False):
+def detect_color(rgbValue, track=False):
     if rgbValue[0] is None or rgbValue[1] is None or rgbValue[2] is None:
         print("rgb value is none.")
         return -1, -1
+    #normalize rgb values to 0-255
     maxValue = max(rgbValue)
     if maxValue!=0:
         for i in range(3):
@@ -73,17 +74,14 @@ def lane_follower(colorIndex):
 def stop():
     #stop the car
     return 0,0
-
 def go_straight():
     #go straight
     return 1,1
-
 def turn_right():
     #turn right
-    return 1,-0.75
-
+    return 1.2,0
 def turn_left():
     #turn left
-    return -0.75,1
+    return 0,1.2
     
     
