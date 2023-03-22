@@ -21,3 +21,4 @@ def run(self):
         elif self.state == 3: #delivering1: adjusting position
             #check for transition events
             #do what the state is supposed to do
+        elif...

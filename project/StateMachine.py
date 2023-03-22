@@ -12,9 +12,9 @@ class StateMachine():
         
         #sensors
         self.laneColorSensor = EV3ColorSensor(1)
-        self.cubeColorSensor = EV3ColorSensor(4)
-        self.leftWheelMotor = Motor("A")
-        self.rightWheelMotor = Motor("D")
+        self.cubeColorSensor = EV3ColorSensor(3)
+        self.leftWheelMotor = Motor("D")
+        self.rightWheelMotor = Motor("A")
         self.leftWheelMotor.set_limits(dps=100, power=50)
         self.rightWheelMotor.set_limits(dps=100, power=50)
         self.rotationMotor = Motor("B")
@@ -33,6 +33,8 @@ class StateMachine():
         self.cubes = []
         self.wheelMotorPower = 25
         self.done = False
+        self.deliverColor = None
+        self.deliverIndex = None
         
     def change_state(self, state):
         print("Transitioninig from state " + self.states[self.state] + " to " + self.states[state])
@@ -55,7 +57,7 @@ class StateMachine():
                 leftRatio, rightRatio = utility.lane_follower(colorIndex)
                 self.leftWheelMotor.set_power(leftRatio*self.wheelMotorPower)
                 self.rightWheelMotor.set_power(rightRatio*self.wheelMotorPower)
-                time.sleep(0.753)
+                time.sleep(0.25)
                 continue
             elif self.state == 3: #delivering1: adjusting position
                 #TODO: adjust position
@@ -63,9 +65,16 @@ class StateMachine():
                     self.change_state(4) #go to rotating platter
                     self.done = False
                     continue
+                count=0
+                while True: 
+                    colorIndex, colorName = utility.detect_color(self.cubeColorSensor.get_rgb(), track = True)
+                    if colorIndex != 2:
+                        count+=1
+                    if count >= 2:
+                        break
                 self.leftWheelMotor.set_power(0)
                 self.rightWheelMotor.set_power(0)
-                # time.sleep(3)
+                time.sleep(3)
                 # self.change_state(2)
                 self.done = True
                 continue
@@ -79,12 +88,18 @@ class StateMachine():
                 if self.deliverColor is None:
                     self.deliverColor = -1
                     while self.deliverColor == -1: #read until color is detected
-                        self.deliverColor = utility.detect_color(self.cubeColorSensor.get_rgb(), track = True)[0]
+                        self.deliverColor = utility.detect_color(self.laneColorSensor.get_rgb(), track = True)[0]
+                    print("color to deliver is :", self.deliverColor)
                     #find index of color
-                    for i in range(len(self.cubes)):
+                    for i in range(6):
                         if self.cubes[i] == self.deliverColor:
                             self.deliverIndex = i
                             break
+                    print(f"deliver index is {self.deliverIndex}")
+                    if self.deliverIndex >= 6:
+                        print("Error: white detected. Attempting to try again...")
+                        self.deliverColor = None
+                        continue
                     if self.deliverIndex is None:
                         print("Error: color not found. Attempting to try again...")
                         self.deliverColor = None
@@ -110,17 +125,27 @@ class StateMachine():
                 self.pushingMotor.set_position_relative(-60) #pull cube back
                 self.pushingMotor.wait_is_stopped() #wait until pulling is done
                 print("moving out of green zone...")
-                self.leftWheelMotor.set_position_relative(360) #move forward 1 tile to exit green zone
-                self.rightWheelMotor.set_position_relative(360) #move forward 1 tile
-                self.leftWheelMotor.wait_is_stopped() #wait until moving is done
-                self.rightWheelMotor.wait_is_stopped() 
+                self.leftWheelMotor.set_power(25)
+                self.rightWheelMotor.set_power(25)
+                count = 0
+                while True: 
+                    colorIndex, colorName = utility.detect_color(self.cubeColorSensor.get_rgb(), track = True)
+                    if colorIndex == 6:
+                        count+=1
+                    if count >= 5:
+                        break
+#                 self.leftWheelMotor.set_position_relative(360) #move forward 1 tile to exit green zone
+#                 self.rightWheelMotor.set_position_relative(360) #move forward 1 tile
+#                 self.leftWheelMotor.wait_is_stopped() #wait until moving is done
+#                 self.rightWheelMotor.wait_is_stopped() 
                 self.cubeDroppedCount += 1 #update cube dropped count
                 self.done = True
-            elif self.state == 6: #final
+            elif self.state == 8: #final
                 exit()
                 
 SM = StateMachine()
+wait_ready_sensors(True)
 SM.run()    
 # while True:
-#     utility.sort_color(SM.cubeColorSensor.get_rgb())
+#     utility.detect_color(SM.cubeColorSensor.get_rgb())
 #     time.sleep(0.5)
