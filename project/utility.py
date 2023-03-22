@@ -44,7 +44,7 @@ def detect_color(rgbValue, track=False):
         distances.append(dist)
     minDistance = min(distances)
     index = distances.index(minDistance)
-    if minDistance >= 75:
+    if minDistance >= 75+15:
        print("not sure. Ignore this value")
        return -1, -1
     # distances = np.linalg.norm(default_colors - rgbValue, axis=1)
@@ -76,10 +76,10 @@ def stop():
     return 0,0
 def go_straight():
     #go straight
-    return 1,1
+    return 1,0.7
 def turn_right():
     #turn right
-    return 1.2,0
+    return 1.2, 0
 def turn_left():
     #turn left
     return 0,1.2
