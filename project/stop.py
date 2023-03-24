@@ -118,7 +118,7 @@ class StateMachine():
                 count = 0
                 while True: 
                     colorIndex, colorName = utility.detect_color(self.cubeColorSensor.get_rgb(), track = True)
-                    if colorIndex == 6:
+                    if colorIndex != 2:
                         count+=1
                     if count >= 5:
                         break

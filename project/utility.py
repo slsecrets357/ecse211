@@ -1,4 +1,4 @@
-
+count=0
 #define colors in rgb space
 #ground values obtained by taking 20 measurements of each color
 BLUE = [150, 255, 230]
@@ -14,7 +14,7 @@ color_names = ['blue', 'red', 'green', 'yellow', 'orange', 'magenta', 'white']
 TRACK_BLUE = [198, 252,  255]
 TRACK_RED = [ 255,  38,  17]
 TRACK_GREEN = [98, 255,  45]
-TRACK_WHITE = [255, 224,  119] #[207, 182,  97]
+TRACK_WHITE = [255, 224,  119] 
 track_default_colors = [TRACK_BLUE, TRACK_RED, TRACK_GREEN, YELLOW, ORANGE, MAGENTA, TRACK_WHITE]
 
 def euclidean_distance(color_a, color_b):
@@ -30,12 +30,12 @@ def detect_color(rgbValue, track=False):
     if rgbValue[0] is None or rgbValue[1] is None or rgbValue[2] is None:
         print("rgb value is none.")
         return -1, -1
-    #normalize rgb values to 0-255
+    #scale rgb values to 0-255
     maxValue = max(rgbValue)
     if maxValue!=0:
         for i in range(3):
             rgbValue[i]*=255/maxValue
-    print(rgbValue)
+    #print(rgbValue)
     #classify color based on euclidean distance to default colors
     distances = []
     colors = default_colors if not track else track_default_colors
@@ -44,19 +44,20 @@ def detect_color(rgbValue, track=False):
         distances.append(dist)
     minDistance = min(distances)
     index = distances.index(minDistance)
-    if minDistance >= 75+15:
+    if minDistance >= 75:
        print("not sure. Ignore this value")
        return -1, -1
     # distances = np.linalg.norm(default_colors - rgbValue, axis=1)
     # index = np.argmin(distances)
-    print("Color detected: " + color_names[index] + " error is " + str(minDistance))
+    count = (count+1)%100
+    if count%20==0:
+        print("Color detected: " + color_names[index] + " error is " + str(minDistance))
     return index, color_names[index]
 
 def lane_follower(colorIndex):
-    #takes as input an rgb value and returns a steering angle
+    #takes as input an rgb value and returns a angular speed for wheels
     #used to follow a lane where left is red and right is blue
     #if color is green, stop
-    #classify color
     
     #if color is red, turn left
     if colorIndex == 1:
@@ -70,18 +71,18 @@ def lane_follower(colorIndex):
 
 # functions returning steering rate of left and right wheels
 # to be called in state machine (not yet implemented)
-# steering rate between 0 and 1, needs to be scaled to actual speed
+# angular rate is ratio of motor power between 0 and 1, needs to be scaled to actual speed
 def stop():
     #stop the car
     return 0,0
 def go_straight():
     #go straight
-    return 1,0.7
+    return 1,1
 def turn_right():
     #turn right
-    return 1.2, 0
+    return 1.0, -0.7
 def turn_left():
     #turn left
-    return 0,1.2
+    return -0.7,1.0
     
     
