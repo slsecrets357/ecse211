@@ -5,17 +5,20 @@ BLUE = [150, 255, 230]
 RED = [255, 20, 20]
 GREEN = [30, 255, 30]
 YELLOW = [255, 215, 15]
-WHITE = [255,255,255]
 ORANGE = [255, 80, 30]
 MAGENTA = [255, 200, 200]
+WHITE = [255,255,255]
 default_colors = [BLUE, RED, GREEN, YELLOW, ORANGE, MAGENTA, WHITE]
 color_names = ['blue', 'red', 'green', 'yellow', 'orange', 'magenta', 'white']
 
 TRACK_BLUE = [198, 252,  255]
 TRACK_RED = [ 255,  38,  17]
 TRACK_GREEN = [98, 255,  45]
+TRACK_YELLOW = [255,  232,  18]
+TRACK_ORANGE = [255,  85,  13]
+TRACK_MAGENTA = [255,  39,  31]
 TRACK_WHITE = [255, 224,  119] 
-track_default_colors = [TRACK_BLUE, TRACK_RED, TRACK_GREEN, YELLOW, ORANGE, MAGENTA, TRACK_WHITE]
+track_default_colors = [TRACK_BLUE, TRACK_RED, TRACK_GREEN, TRACK_YELLOW, TRACK_ORANGE, TRACK_MAGENTA, TRACK_WHITE]
 
 def euclidean_distance(color_a, color_b):
     """
@@ -26,7 +29,7 @@ def euclidean_distance(color_a, color_b):
     b_diff = (color_a[2] - color_b[2]) ** 2
     return (r_diff + g_diff + b_diff) ** 0.5
 
-def detect_color(rgbValue, track=False):
+def detect_color(rgbValue, track=True):
     if rgbValue[0] is None or rgbValue[1] is None or rgbValue[2] is None:
         print("rgb value is none.")
         return -1, -1
@@ -50,7 +53,7 @@ def detect_color(rgbValue, track=False):
     # distances = np.linalg.norm(default_colors - rgbValue, axis=1)
     # index = np.argmin(distances)
     count = (count+1)%100
-    if count%20==0:
+    if count%10==0:
         print("Color detected: " + color_names[index] + " error is " + str(minDistance))
     return index, color_names[index]
 
