@@ -7,7 +7,7 @@ class StateMachine():
     def __init__(self):
         #states
         self.states = ["initial", "cooldown", "lane following", "delivering1: adjust position", "delivering2: rotate platter",
-                        "delivering3: dropping cube", "final"]
+                        "delivering3: dropping cube", "return", "load cubes", "final"]
         self.state = 0
         
         #sensors
@@ -36,6 +36,7 @@ class StateMachine():
         self.deliverColor = None
         self.deliverIndex = None
         self.timer = None
+        self.round = 0
         
     def change_state(self, state):
         print("Transitioninig from state " + self.states[self.state] + " to " + self.states[state])
@@ -102,16 +103,8 @@ class StateMachine():
                         break
                     time.sleep(0.08)
                 print("hi")
-                self.rightWheelMotor.set_position_relative(-65)
+                self.rightWheelMotor.set_position_relative(-65) #rotate back
                 time.sleep(2.2)
-                
-#                 count=0
-#                 while True: 
-#                     colorIndex, colorName = utility.detect_color(self.laneColorSensor.get_rgb(), track = True)
-#                     if colorIndex != 2:
-#                         count+=1
-#                     if count >= 2:
-#                         break
                 self.leftWheelMotor.set_power(0)
                 self.rightWheelMotor.set_power(0)
                 time.sleep(3)
@@ -153,6 +146,9 @@ class StateMachine():
                     continue
             elif self.state == 5: #delivering3: dropping cube
                 if self.done:
+                    if self.round >=1:
+                        print("round 2 complete")
+                        self.change_state(8)
                     newState = 1 if self.cubeDroppedCount < 6 else 6 #go to lane following if not all cubes are dropped, else go to final
                     self.change_state(newState) #go back to lane following
                     self.done = False
@@ -165,22 +161,30 @@ class StateMachine():
                 self.pushingMotor.set_position_relative(80) #pull cube back
                 self.pushingMotor.wait_is_stopped() #wait until pulling is done
                 time.sleep(1)
-#                 print("moving out of green zone...")
-#                 self.leftWheelMotor.set_power(10)
-#                 self.rightWheelMotor.set_power(10)
-#                 
-#                 count = 0
-#                 while True: 
-#                     colorIndex, colorName = utility.detect_color(self.laneColorSensor.get_rgb(), track = True)
-#                     if colorIndex != 2:
-#                         count+=1
-#                     if count >= 3:
-#                         break
- 
                 self.cubeDroppedCount += 1 #update cube dropped count
                 print("cubeDroppedCount: ", self.cubeDroppedCount)
                 self.done = True
+            elif self.state == 6: #move back to initial position
+                #read sensors
+                colorIndex, colorName = utility.detect_color(self.laneColorSensor.get_rgb(), track = True)
+                if colorIndex == 3: #yellow detected
+                    print("yellow detected")
+                    self.change_state(7)
+                    continue
+                leftRatio, rightRatio = utility.lane_follower(colorIndex)
+                self.leftWheelMotor.set_power(-leftRatio*self.wheelMotorPower)
+                self.rightWheelMotor.set_power(-rightRatio*self.wheelMotorPower)
+                time.sleep(0.35)
+                continue
+            elif self.state == 7: #load cubes
+                print("loading cubes...")
+                self.round+=1
+                self.leftWheelMotor.set_power(0)
+                self.rightWheelMotor.set_power(0)
+                time.sleep(10)
+                self.change_state(2)
             elif self.state == 8: #final
+                print("Mission complete. Hope you enjoyed the show!")
                 exit()
                 
 SM = StateMachine()
